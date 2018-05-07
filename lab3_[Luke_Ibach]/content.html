@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+    <head>            
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="description" content="Free Web tutorials">
+        <meta name="keywords" content="HTML,CSS,XML,JavaScript">
+        <meta name="author" content="John Doe">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="https://fonts.googleapis.com/css?family=Patua+One" rel="stylesheet">
+
+        <style>
+            body {
+                background-color:#5E6472;
+                font-family: 'Patua One', cursive;
+                /*#AED9E0;*/
+            }
+
+            h1 {
+                font-size:4em;
+                text-align:center;
+                color:#AED9E0;
+            }
+
+            .question {
+                margin-left:auto;
+                margin-right:auto;
+                margin-top:30px;
+                padding-bottom:10px;
+                width:65%;
+                background-color:#FAF3DD;
+                border:4px solid #FAF3DD;
+                border-radius:25px;
+            }
+
+            h3 {
+                color:#5E6472;
+                font-size: 2em;
+                margin-left:auto;
+                margin-right:auto;
+                text-align:center;
+            }
+
+            p {
+                color:#5E6472;
+                display:block;
+                margin-left:40px;
+                margin-right:50px;
+            }
+
+            .optionSequence1 {
+                display:none;
+                list-style-type:none;
+            }
+
+            .optionSequence2 {
+                display:none;
+                list-style-type:none;
+            }
+
+            .optionSequence3 {
+                display:none;
+                list-style-type:none;
+            }
+
+            .optionSequence4 {
+                display:none;
+                list-style-type:none;
+            }
+
+            li {
+                flex:0 1 80%;
+                flex-wrap:wrap;
+                padding:10px;
+                margin-right:40px;
+                margin-top:10px;
+                margin-bottom:15px;
+                color:#5E6472;
+                border:2px solid #5E6472;
+                border-radius:25px;
+            }
+
+            li:hover {
+                background-color: #AED9E0;
+            }
+
+            .result {
+                display:none;
+                text-align:center;
+            }
+
+            #next {
+                display:block;
+                height:30px;
+                width:100px;
+                margin-top:40px;
+                margin-bottom:30px;
+                margin-left:auto;
+                margin-right:auto;
+                padding-top:8px;
+                color: #5E6472;
+                background-color:#AED9E0;
+                border:1px solid #AED9E0;
+                text-align:center;
+            }
+
+            #score {
+                margin-left:auto;
+                margin-right:auto;
+                margin-top:30px;
+                padding-top:30px;
+                padding-bottom:30px;
+                width:65%;
+                color: #5E6472;
+                background-color:#FAF3DD;
+                border:4px solid #FAF3DD;
+                border-radius:25px;
+                text-align:center;
+                display:none;
+            }
+        </style>
+    </head>
+    <body>
+
+        <h1>TRIVIA</h1>
+        <li class="correctAnswer" style="display:none;">  </li>
+        <li class="incorrectAnswer" style="display:none;"> </li>
+        {{#dataOutput}}
+            <!-- {{results.[0].question}}{{results.[x].correct_answer}}-->
+
+            {{#each results}}
+            <div class="question">
+                <h3 >Question #{{@key}}</h3>                
+                <p >{{this.question}}</p>
+                <!--there will be 4 possible option sequences to make sure that the question are put in a random order-->
+                <!--------------------------------------------Option Sequence #1---------------------------------------->
+                <ul class="optionSequence1"> 
+                    <li class="correctAnswer"> {{this.correct_answer}}</li>
+                    {{#each this.incorrect_answers}}
+                    <li class="incorrectAnswer"> {{this}} </li>
+                    {{/each}}
+                </ul>
+                <!--------------------------------------------Option Sequence #2---------------------------------------->
+                <!--the #if statements control how many <li> elements are drawn in the true false scenarios-->
+                <ul class="optionSequence2">
+                    <li class="incorrectAnswer"> {{this.incorrect_answers.[0]}} </li>
+                    <li class="correctAnswer"> {{this.correct_answer}}</li>
+                    {{#if this.incorrect_answers.[1]}}
+                    <li class="incorrectAnswer"> {{this.incorrect_answers.[1]}} </li>
+                    <li class="incorrectAnswer"> {{this.incorrect_answers.[2]}} </li>
+                    {{/if}}
+                </ul>
+                <!--------------------------------------------Option Sequence #3---------------------------------------->
+                <!--the #if statements control how many <li> elements are drawn in the true false scenarios-->
+                <ul class="optionSequence3">
+                        <li class="incorrectAnswer"> {{this.incorrect_answers.[0]}} </li>
+                        {{#if this.incorrect_answers.[1]}}
+                        <li class="incorrectAnswer"> {{this.incorrect_answers.[1]}}</li>
+                        {{/if}}
+                        <li class="correctAnswer"> {{this.correct_answer}} </li>
+                        {{#if this.incorrect_answers.[2]}}
+                        <li class="incorrectAnswer"> {{this.incorrect_answers.[2]}} </li>
+                        {{/if}}
+                </ul>
+                <!--------------------------------------------Option Sequence #4---------------------------------------->
+                <ul class="optionSequence4"> 
+                    {{#each this.incorrect_answers}}
+                    <li class="incorrectAnswer"> {{this}} </li>
+                    {{/each}}
+                    <li class="correctAnswer"> {{this.correct_answer}}</li>
+                </ul>
+                <div class="result">
+                    <p> <b>THE ANSWER IS: </b>{{this.correct_answer}}</p> 
+                </div>
+            </div>
+            {{/each}}
+            
+        {{/dataOutput}}
+
+
+        <div id="next">
+            NEXT
+        </div>
+
+
+        <h3 id="score"> </h3>
+
+        <script> 
+
+        //This will manipulate which trivia question is hidden at which time.
+        var displayedQ = 1;
+        //This will be set to a random number between 0 and 4 and will trigger certain answer combinations being shown or hidden.
+        var displayedOptions = 1;
+        //this will determine the index of the correct <li> to place the correct answer listener on.
+        var correctAnswer;
+        //this will determine the index of the correct <li> to place the incorrect answer listener on.
+        var incorrectAnswer;
+
+        var score = 0;
+        
+        function updateQ()
+        {
+
+            document.getElementById('next').style.display = "none";
+            for (i = 0; i < 40; i += 1) 
+            {   
+                //These statements hide all of the questions other than the one that is supposed to be shown.
+                document.getElementsByClassName('question')[i].style.display = "none";  
+
+                //These statements hide all of the option sequences
+                document.getElementsByClassName('optionSequence1')[i].style.display = "none"; 
+                document.getElementsByClassName('optionSequence2')[i].style.display = "none";  
+                document.getElementsByClassName('optionSequence3')[i].style.display = "none"; 
+                document.getElementsByClassName('optionSequence4')[i].style.display = "none"; 
+
+                if (displayedQ < 11)
+                {
+                    document.getElementsByClassName('question')[displayedQ].style.display = "block";
+
+                    //This switch statement changes the correct sequence to visible 
+                    switch(displayedOptions)
+                    {
+                        case 1: document.getElementsByClassName('optionSequence1')[displayedQ].style.display = "block"; break;
+                        case 2: document.getElementsByClassName('optionSequence2')[displayedQ].style.display = "block"; break;
+                        case 3: document.getElementsByClassName('optionSequence3')[displayedQ].style.display = "block"; break;
+                        case 4: document.getElementsByClassName('optionSequence4')[displayedQ].style.display = "block"; break;
+                    }
+                }
+                else
+                {
+                    document.getElementById('score').innerHTML ="You got " + score + " out of 10 questions right.";
+                    document.getElementById('score').style.display = "block";
+
+                }
+            }
+        }
+
+        function rightAnswer()
+        {
+            //set the correct answer to the color green
+            document.getElementsByClassName('correctAnswer')[correctAnswer].style.backgroundColor = "#B8F2E6";
+            //remove all the event listeners that were previously set. this way we don't have too many active event listeners.
+            document.getElementsByClassName('correctAnswer')[correctAnswer].removeEventListener('click', rightAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 1].removeEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 2].removeEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 3].removeEventListener('click', wrongAnswer);
+            score += 1;
+            //show the answer for the question
+            showAnswer()
+        }
+
+        function wrongAnswer()
+        {
+            //set the correct answer to green
+            document.getElementsByClassName('correctAnswer')[correctAnswer].style.backgroundColor = "#B8F2E6";
+            //set the incorrect answer to red.
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 1].style.backgroundColor = "#FFA69E";
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 2].style.backgroundColor = "#FFA69E";
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 3].style.backgroundColor = "#FFA69E";
+            //remove all of the event listeners that were previously set.
+            document.getElementsByClassName('correctAnswer')[correctAnswer].removeEventListener('click', rightAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 1].removeEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 2].removeEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 3].removeEventListener('click', wrongAnswer);  
+            //show the answer for the question
+            showAnswer();        
+        }
+
+        function showAnswer()
+        {
+            document.getElementsByClassName('result')[displayedQ].style.display = "block";
+            document.getElementById('next').style.display = "block";
+        }
+
+
+        document.getElementById('next').addEventListener('click', function(){
+
+            displayedQ += 1;
+            displayedOptions = Math.floor(Math.random() * 4) + 1; 
+            //correctAnswer is the index for the correctAnswer <li> that is currently displayed. 
+            correctAnswer = displayedOptions + (displayedQ * 4);
+            incorrectAnswer = displayedQ * 12 + (3 * (displayedOptions - 1))
+            document.getElementsByClassName('correctAnswer')[correctAnswer].addEventListener('click', rightAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 1].addEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 2].addEventListener('click', wrongAnswer);
+            document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 3].addEventListener('click', wrongAnswer);
+            updateQ();          
+
+        });
+
+        //Sets up first event listener for the correct answer.
+        correctAnswer = displayedOptions + (displayedQ * 4);
+        incorrectAnswer = displayedQ * 12 + (3 * (displayedOptions - 1))
+        document.getElementsByClassName('correctAnswer')[correctAnswer].addEventListener('click', rightAnswer);
+        document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 1].addEventListener('click', wrongAnswer);
+        document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 2].addEventListener('click', wrongAnswer);
+        document.getElementsByClassName('incorrectAnswer')[incorrectAnswer + 3].addEventListener('click', wrongAnswer);
+        console.log(incorrectAnswer)
+        updateQ();
+
+        </script>
+    </body>
+</html>
